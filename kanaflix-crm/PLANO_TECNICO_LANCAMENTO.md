@@ -6,6 +6,18 @@
 >
 > Este plano trata da estabilização e do lançamento do produto atual. O editor visual de fluxos de e-mail está documentado somente como trabalho futuro e **não deve ser implementado durante as fases de lançamento**.
 
+## Status da execução
+
+Última execução: 16 de setembro de 2026.
+
+- **Concluído localmente:** aplicação completa versionada no GitHub; CI de lint/build criado; Next.js atualizado para `16.3.5`; auditoria de produção sem vulnerabilidades; headers de segurança básicos; estados globais de carregamento/erro/404; navegação mobile; recuperação e redefinição de senha; build e lint aprovados; 36 verificações de isolamento multitenant aprovadas; suíte de captura pública aprovada.
+- **Commits publicados:** `2dd5785`, `d19b614`, `375b4a4` na branch `main`.
+- **Preview local:** `http://localhost:8081` ativo.
+- **Gate externo aberto:** a produção ainda responde 404 para `/recuperar-senha` e `/redefinir-senha`; configurar o Root Directory da Vercel como `kanaflix-crm`, confirmar o deployment do commit `375b4a4` e repetir o smoke test.
+- **Gates ainda não executados:** rate limit/Turnstile, Storage por workspace, convites por e-mail, observabilidade, backup/restore, importação/exportação, integrações Meta/GTM funcionais, revisão jurídica e beta controlado.
+
+Não marque uma fase como concluída apenas por causa dos itens locais acima; os gates externos e os critérios de aceite de cada fase continuam obrigatórios.
+
 ---
 
 ## 1. Objetivo
