@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Link from "next/link";
 import { ArrowRight, LoaderCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -153,7 +154,13 @@ export function AuthForm() {
             className="h-12 w-full rounded-2xl border border-border bg-surface px-4 text-sm"
             placeholder="Mínimo de 6 caracteres"
           />
-        </label>
+          </label>
+
+        {mode === "login" && (
+          <div className="-mt-2 text-right">
+            <Link href="/recuperar-senha" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Esqueci minha senha</Link>
+          </div>
+        )}
 
         {error && <p className="rounded-2xl bg-brand-soft px-4 py-3 text-sm text-foreground">{error}</p>}
         {message && <p className="rounded-2xl bg-brand-soft px-4 py-3 text-sm text-foreground">{message}</p>}
