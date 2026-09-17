@@ -1,5 +1,6 @@
 import { createPublicClient } from "@/lib/supabase/public";
 import type { LeadFormField } from "@/lib/lead-forms";
+import { consumePublicRequest } from "@/lib/public-rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -132,6 +133,16 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/form
 }
 
 export async function POST(request: Request, { params }: RouteContext<"/api/forms/[slug]/submit">) {
+  const { slug } = await params;
+  const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "unknown";
+  const rate = consumePublicRequest(`form:${slug}:${clientIp}`);
+  if (!rate.allowed) {
+    return new Response(JSON.stringify({ error: "Muitas tentativas. Aguarde alguns segundos e tente novamente." }), {
+      status: 429,
+      headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": String(rate.retryAfterSeconds) },
+    });
+  }
+
   const contentLength = Number(request.headers.get("content-length") ?? 0);
   if (contentLength > 25000) return errorResponse(request, "Os dados enviados ultrapassam o limite permitido.", 413);
 
@@ -150,7 +161,6 @@ export async function POST(request: Request, { params }: RouteContext<"/api/form
   delete payload.full_name;
   const attribution = takeAttribution(payload, request);
 
-  const { slug } = await params;
   const supabase = createPublicClient();
   const { data: formData, error: formError } = await supabase.rpc("get_public_lead_form", { target_slug: slug });
   const form = formData?.[0];

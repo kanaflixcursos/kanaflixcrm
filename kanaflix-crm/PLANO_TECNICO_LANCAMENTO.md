@@ -8,13 +8,15 @@
 
 ## Status da execução
 
-Última execução: 16 de setembro de 2026.
+Última execução: 17 de setembro de 2026.
 
-- **Concluído localmente:** aplicação completa versionada no GitHub; CI de lint/build criado; Next.js atualizado para `16.3.5`; auditoria de produção sem vulnerabilidades; headers de segurança básicos; estados globais de carregamento/erro/404; navegação mobile; recuperação e redefinição de senha; build e lint aprovados; 36 verificações de isolamento multitenant aprovadas; suíte de captura pública aprovada.
-- **Commits publicados:** `2dd5785`, `d19b614`, `375b4a4` na branch `main`.
+- **Concluído localmente:** aplicação completa versionada no GitHub; CI de lint/build criado; Next.js atualizado para `16.3.5`; auditoria de produção sem vulnerabilidades; headers de segurança básicos; estados globais de carregamento/erro/404; navegação mobile; recuperação e redefinição de senha; build e lint aprovados; 38 verificações de isolamento multitenant aprovadas; suíte de captura pública aprovada; uploads de imagem separados por workspace; proteção de rajadas no endpoint público.
+- **Commits publicados:** `2dd5785`, `d19b614`, `375b4a4`, `301f755` e o checkpoint desta execução na branch `main`.
 - **Preview local:** `http://localhost:8081` ativo.
 - **Gate Vercel concluído:** Root Directory configurado como `kanaflix-crm`; o deployment `B6wTvD5hqM6NNrKnRYckNrUX1WPK` foi publicado como Production e as rotas `/`, `/entrar`, `/recuperar-senha`, `/redefinir-senha`, `/privacidade` e `/termos` retornam 200.
-- **Gates ainda não executados:** rate limit/Turnstile, Storage por workspace, convites por e-mail, observabilidade, backup/restore, importação/exportação, integrações Meta/GTM funcionais, revisão jurídica e beta controlado.
+- **Gates ainda não executados:** rate limit distribuído/Turnstile, convites por e-mail, observabilidade, backup/restore, importação/exportação, integrações Meta/GTM funcionais, revisão jurídica e beta controlado.
+
+O endpoint público já possui um limitador local por instância (30 requisições por minuto por IP e slug, com resposta `429` e `Retry-After`). Isso reduz abuso acidental e foi validado junto à suíte de captura, mas não substitui um limitador distribuído em produção; o gate final ainda requer Redis/Upstash ou equivalente e, se necessário, Turnstile.
 
 Não marque uma fase como concluída apenas por causa dos itens locais acima; os gates externos e os critérios de aceite de cada fase continuam obrigatórios.
 
@@ -74,8 +76,8 @@ O lançamento não depende de acrescentar muitas funcionalidades. Ele depende de
 - existem scripts sintéticos para multitenancy e captura;
 - o banco utiliza `organization_id` e RLS nas entidades principais;
 - o endpoint de captura aceita JSON, URL encoded, multipart e texto simples;
-- o código completo da aplicação ainda não está versionado no repositório Git: atualmente apenas o README da raiz está rastreado;
-- a auditoria de dependências encontrou vulnerabilidades críticas/altas, incluindo a versão atual do Next.js;
+- o código da aplicação está versionado no repositório Git e os checkpoints de lançamento estão publicados na branch `main`;
+- `npm audit --omit=dev` retorna zero vulnerabilidades conhecidas nas dependências de produção;
 - a busca global, notificações, ajuda e execução das integrações de tracking ainda não estão completas.
 
 ---
@@ -356,7 +358,7 @@ Tornar formulários, iframe e endpoints públicos resistentes a abuso e fáceis 
 
 ### Tarefas
 
-- [ ] Implementar rate limit por IP, slug e workspace.
+- [ ] Substituir o limitador local atual por rate limit distribuído por IP, slug e workspace (Redis/Upstash) e avaliar Turnstile antes do beta público.
 - [ ] Adicionar Turnstile opcional por formulário.
 - [ ] Permitir domínios/origens autorizados por formulário sem quebrar uso server-to-server.
 - [ ] Criar segredo opcional para endpoint privado.

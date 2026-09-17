@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, LoaderCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -11,7 +11,17 @@ export function AuthForm() {
   const [mode, setMode] = useState<AuthMode>("login");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(() =>
+    typeof window !== "undefined" && new URLSearchParams(window.location.search).get("error") === "oauth_callback"
+      ? "Não foi possível concluir o acesso com Google. Tente novamente."
+      : null,
+  );
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("error") === "oauth_callback") {
+      window.history.replaceState({}, "", "/entrar");
+    }
+  }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
