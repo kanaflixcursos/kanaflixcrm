@@ -10,7 +10,7 @@
 
 Última execução: 17 de setembro de 2026.
 
-- **Concluído localmente:** aplicação completa versionada no GitHub; CI de lint/build criado; Next.js atualizado para `16.3.5`; auditoria de produção sem vulnerabilidades; headers de segurança básicos; estados globais de carregamento/erro/404; navegação mobile; recuperação e redefinição de senha; callback OAuth com erro recuperável; build e lint aprovados; 38 verificações de isolamento multitenant aprovadas; suíte de captura pública aprovada; uploads de imagem separados por workspace; proteção de rajadas no endpoint público; allowlist opcional de origens por formulário; Turnstile opcional por formulário; exportação CSV dos leads filtrados por workspace.
+- **Concluído localmente:** aplicação completa versionada no GitHub; CI de lint/build criado; Next.js atualizado para `16.3.5`; auditoria de produção sem vulnerabilidades; headers de segurança básicos; estados globais de carregamento/erro/404; navegação mobile; recuperação e redefinição de senha; callback OAuth com erro recuperável; build e lint aprovados; 38 verificações de isolamento multitenant aprovadas; suíte de captura pública aprovada; uploads de imagem separados por workspace; proteção de rajadas no endpoint público; allowlist opcional de origens por formulário; Turnstile opcional por formulário; validação de formato e status honesto para Meta/GTM; exportação CSV dos leads filtrados por workspace.
 - **Operabilidade adicionada:** endpoint público `GET /api/health` para smoke tests e monitores, sem exposição de segredos.
 - **Fase de dados em andamento:** importação CSV básica por workspace com limite de arquivo/linhas, validação e deduplicação por e-mail ou telefone; o preview visual e o processamento assíncrono para volumes maiores ainda permanecem pendentes.
 - **Commits publicados:** `2dd5785`, `d19b614`, `375b4a4`, `301f755` e `0403f17` na branch `main`.
@@ -482,9 +482,9 @@ Transformar configurações armazenadas em integrações verificáveis e transpa
 
 ### Meta e GTM
 
-- [ ] Não mostrar estado “ativo” apenas porque um ID foi salvo.
+- [x] Não mostrar estado “ativo” apenas porque um ID foi salvo.
 - [ ] Usar estados: não configurada, configurada, validada, ativa e com erro.
-- [ ] Validar formato de Pixel ID e Container ID.
+- [x] Validar formato de Pixel ID e Container ID.
 - [ ] Criar teste de instalação e tela de diagnóstico.
 - [ ] Definir eventos padronizados:
   - formulário visualizado;

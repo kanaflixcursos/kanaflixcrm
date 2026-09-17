@@ -23,8 +23,8 @@ export default async function IntegrationsPage() {
           <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">Guarde os identificadores do cliente agora. O disparo de eventos via navegador e servidor será conectado sobre esta mesma estrutura.</p>
         </header>
         <div className="mt-10 grid gap-6">
-          <IntegrationForm provider="meta_pixel" title="Meta Pixel" description="Base para eventos como Lead e CompleteRegistration, com suporte futuro à Conversions API." externalId={meta?.external_id} active={meta?.status === "active"} placeholder="Ex.: 123456789012345" />
-          <IntegrationForm provider="google_tag_manager" title="Google Tag Manager" description="Container do cliente para eventos padronizados no dataLayer e integração com Google Ads/GA4." externalId={gtm?.external_id} active={gtm?.status === "active"} placeholder="Ex.: GTM-XXXXXXX" />
+          <IntegrationForm provider="meta_pixel" title="Meta Pixel" description="Base para eventos como Lead e CompleteRegistration, com suporte futuro à Conversions API." externalId={meta?.external_id} status={meta?.status ?? "draft"} placeholder="Ex.: 123456789012345" />
+          <IntegrationForm provider="google_tag_manager" title="Google Tag Manager" description="Container do cliente para eventos padronizados no dataLayer e integração com Google Ads/GA4." externalId={gtm?.external_id} status={gtm?.status ?? "draft"} placeholder="Ex.: GTM-XXXXXXX" />
         </div>
       </div>
     </AppShell>

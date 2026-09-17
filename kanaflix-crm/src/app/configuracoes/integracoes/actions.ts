@@ -19,13 +19,15 @@ export async function saveTrackingIntegration(_state: IntegrationState, formData
     enabled: formData.get("enabled"),
   });
   if (!parsed.success) return { error: "Informe um identificador válido para a integração." };
+  const validId = parsed.data.provider === "meta_pixel" ? /^\d{5,20}$/.test(parsed.data.externalId) : /^GTM-[A-Z0-9]+$/i.test(parsed.data.externalId);
+  if (!validId) return { error: parsed.data.provider === "meta_pixel" ? "O Pixel ID deve conter somente números." : "O Container ID deve seguir o formato GTM-XXXXXXX." };
 
   const { supabase, organization } = await getCurrentWorkspace();
   const { error } = await supabase.from("tracking_integrations").upsert({
     organization_id: organization.id,
     provider: parsed.data.provider,
     external_id: parsed.data.externalId,
-    status: parsed.data.enabled ? "active" : "paused",
+    status: parsed.data.enabled ? "configured" : "paused",
   }, { onConflict: "organization_id,provider" });
 
   if (error) return { error: "Não foi possível salvar a integração." };
