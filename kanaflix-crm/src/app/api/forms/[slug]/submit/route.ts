@@ -83,6 +83,11 @@ function errorResponse(request: Request, message: string, status: number) {
   return wantsHtml(request) ? html(message, status) : json({ error: message }, status);
 }
 
+function normalizedOrigin(value: string | null) {
+  if (!value) return null;
+  try { return new URL(value).origin; } catch { return null; }
+}
+
 async function readPayload(request: Request): Promise<Record<string, unknown>> {
   const contentType = (request.headers.get("content-type") ?? "").toLowerCase();
 
@@ -165,6 +170,11 @@ export async function POST(request: Request, { params }: RouteContext<"/api/form
   const { data: formData, error: formError } = await supabase.rpc("get_public_lead_form", { target_slug: slug });
   const form = formData?.[0];
   if (formError || !form) return errorResponse(request, "Formulário não encontrado ou indisponível.", 404);
+  const requestOrigin = normalizedOrigin(request.headers.get("origin"));
+  const allowedOrigins = Array.isArray(form.allowed_origins) ? form.allowed_origins : [];
+  if (requestOrigin && allowedOrigins.length > 0 && !allowedOrigins.includes(requestOrigin)) {
+    return errorResponse(request, "Esta origem não está autorizada para enviar este formulário.", 403);
+  }
   payload = normalizeFormPayload(payload, Array.isArray(form.fields) ? form.fields as LeadFormField[] : []);
 
   const { data, error } = await supabase.rpc("submit_public_lead_form", {

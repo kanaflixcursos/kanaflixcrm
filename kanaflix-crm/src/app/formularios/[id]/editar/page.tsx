@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export default async function EditFormPage({ params }: Readonly<{ params: Promise<{ id: string }> }>) {
   const { id } = await params;
   const { supabase, organization } = await getCurrentWorkspace();
-  const { data: form } = await supabase.from("lead_forms").select("id, name, slug, title, description, success_message, redirect_url, status, fields, campaign_name, default_tags").eq("id", id).maybeSingle();
+  const { data: form } = await supabase.from("lead_forms").select("id, name, slug, title, description, success_message, redirect_url, status, fields, campaign_name, default_tags, allowed_origins").eq("id", id).maybeSingle();
   if (!form) notFound();
   if (form.status === "archived") notFound();
 

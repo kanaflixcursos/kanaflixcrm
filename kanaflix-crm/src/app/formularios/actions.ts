@@ -27,7 +27,24 @@ const formSchema = z.object({
   status: z.enum(["draft", "published"]),
   campaignName: z.string().trim().max(300),
   defaultTags: z.string(),
+  allowedOrigins: z.string().trim().max(5000),
 });
+
+function parseAllowedOrigins(value: string): { data: string[] } | { error: string } {
+  const origins = [...new Set(value.split(/\r?\n/).map((item) => item.trim()).filter(Boolean))];
+  if (origins.length > 20) return { error: "Informe no máximo 20 origens autorizadas." } as const;
+  const normalized: string[] = [];
+  for (const value of origins) {
+    try {
+      const url = new URL(value);
+      if (!["http:", "https:"].includes(url.protocol) || url.origin !== value.replace(/\/$/, "") || url.pathname !== "/" || url.search || url.hash) throw new Error();
+      normalized.push(url.origin);
+    } catch {
+      return { error: `Origem inválida: ${value}. Use somente https://dominio.com.` } as const;
+    }
+  }
+  return { data: normalized } as const;
+}
 
 async function getActionWorkspace() {
   const supabase = await createClient();
@@ -56,12 +73,15 @@ function readFormData(formData: FormData) {
     status: formData.get("status"),
     campaignName: formData.get("campaignName"),
     defaultTags: String(formData.get("defaultTags") ?? ""),
+    allowedOrigins: String(formData.get("allowedOrigins") ?? ""),
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message } as const;
 
   const fields = parseLeadFormFields(String(formData.get("fields") ?? ""));
   if (!fields.success) return { error: fields.error } as const;
-  return { data: { ...parsed.data, fields: fields.data } } as const;
+  const origins = parseAllowedOrigins(parsed.data.allowedOrigins);
+  if (!("data" in origins)) return { error: origins.error } as const;
+  return { data: { ...parsed.data, fields: fields.data, allowedOrigins: origins.data } } as const;
 }
 
 function refreshForms() {
@@ -94,6 +114,7 @@ export async function createLeadForm(
       fields: input.data.fields,
       campaign_name: input.data.campaignName || null,
       default_tags: parseTags(input.data.defaultTags),
+      allowed_origins: input.data.allowedOrigins,
     })
     .select("id")
     .single();
@@ -128,6 +149,7 @@ export async function updateLeadForm(
       fields: input.data.fields,
       campaign_name: input.data.campaignName || null,
       default_tags: parseTags(input.data.defaultTags),
+      allowed_origins: input.data.allowedOrigins,
     })
     .eq("id", formId.data)
     .eq("organization_id", workspace.organizationId);

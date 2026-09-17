@@ -17,6 +17,7 @@ type FormValue = {
   fields: LeadFormField[];
   campaign_name: string | null;
   default_tags: string[];
+  allowed_origins: string[];
 };
 
 const initialState: LeadFormActionState = {};
@@ -122,6 +123,16 @@ export function FormBuilder({ form }: Readonly<{ form?: FormValue }>) {
             <textarea name="description" rows={3} defaultValue={form?.description ?? ""} placeholder="Preencha seus dados e entraremos em contato." className="w-full resize-y rounded-2xl border border-border bg-surface px-4 py-3 text-sm" />
           </label>
         </div>
+      </section>
+
+      <section className="rounded-3xl border border-border bg-surface p-6 shadow-sm sm:p-8">
+        <h2 className="text-lg font-medium">Segurança da captação</h2>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">Restrinja envios feitos pelo navegador a origens específicas. Deixe vazio para aceitar qualquer origem; integrações server-to-server continuam funcionando.</p>
+        <label className="mt-6 block space-y-2">
+          <span className="text-sm font-medium">Origens autorizadas <span className="font-normal text-muted-foreground">(opcional)</span></span>
+          <textarea name="allowedOrigins" rows={4} defaultValue={form?.allowed_origins.join("\n") ?? ""} placeholder={'https://www.seusite.com.br\nhttps://landing.seusite.com.br'} className="w-full resize-y rounded-2xl border border-border bg-surface px-4 py-3 text-sm" />
+          <span className="block text-xs leading-5 text-muted-foreground">Uma origem por linha, sem caminho ou barra final. Até 20 origens.</span>
+        </label>
       </section>
 
       <section className="rounded-3xl border border-border bg-surface p-6 shadow-sm sm:p-8">

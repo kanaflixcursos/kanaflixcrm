@@ -28,8 +28,8 @@ try {
     values ('${userId}', gen_random_uuid(), 'authenticated', 'authenticated', '${email}', 'not-used', now(), '{"provider":"email","providers":["email"]}', '{"full_name":"QA Lead Capture"}', now(), now(), false, false);
     insert into public.lead_automation_rules (organization_id, name, trigger_type, trigger_value, set_status, add_tags)
     values ('${userId}', 'QA campanha qualificada', 'utm_campaign', 'qa-campaign', 'qualified', array['automated']);
-    insert into public.lead_forms (id, organization_id, created_by, name, slug, title, redirect_url, status, campaign_name, default_tags)
-    values ('${formId}', '${userId}', '${userId}', 'QA endpoint', '${slug}', 'Formulário sintético', 'https://qa.kanaflix.test/obrigado', 'published', 'qa-default-campaign', array['qa-form', 'inbound']);
+    insert into public.lead_forms (id, organization_id, created_by, name, slug, title, redirect_url, status, campaign_name, default_tags, allowed_origins)
+    values ('${formId}', '${userId}', '${userId}', 'QA endpoint', '${slug}', 'Formulário sintético', 'https://qa.kanaflix.test/obrigado', 'published', 'qa-default-campaign', array['qa-form', 'inbound'], array['https://qa.kanaflix.test']);
     update public.lead_forms
     set fields = fields || jsonb_build_array(jsonb_build_object('key', 'custom_origin', 'label', 'Como conheceu o Kanaflix?', 'type', 'text', 'required', false, 'placeholder', ''))
     where id = '${formId}';
@@ -53,6 +53,13 @@ try {
     body: JSON.stringify({ data: { Nome: "QA Framer", "E-mail": "qa-framer@endpoint.test", Telefone: "11555555555", "Como conheceu o Kanaflix?": "Google" } }),
   });
   if (framerResponse.status !== 200) throw new Error(`O webhook no formato do Framer respondeu ${framerResponse.status}: ${await framerResponse.text()}`);
+
+  const blockedOriginResponse = await fetch(`${previewUrl}/api/forms/${slug}/submit`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Origin: "https://blocked.example" },
+    body: JSON.stringify({ name: "QA Origem bloqueada", email: "qa-blocked@endpoint.test", phone: "11555555555" }),
+  });
+  if (blockedOriginResponse.status !== 403) throw new Error(`A allowlist de origens respondeu ${blockedOriginResponse.status}, esperado 403.`);
 
   const submissionResponse = await fetch(`${previewUrl}/api/forms/${slug}/submit`, {
     method: "POST",
