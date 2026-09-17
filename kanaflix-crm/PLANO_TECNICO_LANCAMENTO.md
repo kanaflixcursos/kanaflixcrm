@@ -10,8 +10,8 @@
 
 Última execução: 17 de setembro de 2026.
 
-- **Concluído localmente:** aplicação completa versionada no GitHub; CI de lint/build criado; Next.js atualizado para `16.3.5`; auditoria de produção sem vulnerabilidades; headers de segurança básicos; estados globais de carregamento/erro/404; navegação mobile; recuperação e redefinição de senha; build e lint aprovados; 38 verificações de isolamento multitenant aprovadas; suíte de captura pública aprovada; uploads de imagem separados por workspace; proteção de rajadas no endpoint público.
-- **Commits publicados:** `2dd5785`, `d19b614`, `375b4a4`, `301f755` e o checkpoint desta execução na branch `main`.
+- **Concluído localmente:** aplicação completa versionada no GitHub; CI de lint/build criado; Next.js atualizado para `16.3.5`; auditoria de produção sem vulnerabilidades; headers de segurança básicos; estados globais de carregamento/erro/404; navegação mobile; recuperação e redefinição de senha; callback OAuth com erro recuperável; build e lint aprovados; 38 verificações de isolamento multitenant aprovadas; suíte de captura pública aprovada; uploads de imagem separados por workspace; proteção de rajadas no endpoint público.
+- **Commits publicados:** `2dd5785`, `d19b614`, `375b4a4`, `301f755` e `0403f17` na branch `main`.
 - **Preview local:** `http://localhost:8081` ativo.
 - **Gate Vercel concluído:** Root Directory configurado como `kanaflix-crm`; o deployment `B6wTvD5hqM6NNrKnRYckNrUX1WPK` foi publicado como Production e as rotas `/`, `/entrar`, `/recuperar-senha`, `/redefinir-senha`, `/privacidade` e `/termos` retornam 200.
 - **Gates ainda não executados:** rate limit distribuído/Turnstile, convites por e-mail, observabilidade, backup/restore, importação/exportação, integrações Meta/GTM funcionais, revisão jurídica e beta controlado.
