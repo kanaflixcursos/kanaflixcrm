@@ -16,7 +16,7 @@
 - **Gate Vercel concluído:** Root Directory configurado como `kanaflix-crm`; o deployment `B6wTvD5hqM6NNrKnRYckNrUX1WPK` foi publicado como Production e as rotas `/`, `/entrar`, `/recuperar-senha`, `/redefinir-senha`, `/privacidade` e `/termos` retornam 200.
 - **Gates ainda não executados:** rate limit distribuído/Turnstile, convites por e-mail, observabilidade, backup/restore, importação/exportação, integrações Meta/GTM funcionais, revisão jurídica e beta controlado.
 
-O endpoint público já possui um limitador local por instância (30 requisições por minuto por IP e slug, com resposta `429` e `Retry-After`). Isso reduz abuso acidental e foi validado junto à suíte de captura, mas não substitui um limitador distribuído em produção; o gate final ainda requer Redis/Upstash ou equivalente e, se necessário, Turnstile.
+O endpoint público já possui proteção de 30 requisições por minuto por IP e slug, com resposta `429` e `Retry-After`. O código usa Redis/Upstash de forma distribuída quando `UPSTASH_REDIS_REST_URL` e `UPSTASH_REDIS_REST_TOKEN` estão configurados e recua para memória em desenvolvimento ou indisponibilidade do serviço. O gate final ainda requer configurar e validar o Redis em produção e, se necessário, Turnstile.
 
 Não marque uma fase como concluída apenas por causa dos itens locais acima; os gates externos e os critérios de aceite de cada fase continuam obrigatórios.
 
@@ -358,7 +358,7 @@ Tornar formulários, iframe e endpoints públicos resistentes a abuso e fáceis 
 
 ### Tarefas
 
-- [ ] Substituir o limitador local atual por rate limit distribuído por IP, slug e workspace (Redis/Upstash) e avaliar Turnstile antes do beta público.
+- [ ] Configurar e validar em produção o rate limit distribuído por IP e slug (Redis/Upstash) e avaliar Turnstile antes do beta público.
 - [ ] Adicionar Turnstile opcional por formulário.
 - [ ] Permitir domínios/origens autorizados por formulário sem quebrar uso server-to-server.
 - [ ] Criar segredo opcional para endpoint privado.

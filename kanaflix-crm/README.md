@@ -41,7 +41,7 @@ Os dois scripts de verificação sintética exigem `SUPABASE_ACCESS_TOKEN` e usa
 
 ## Ambientes e deploy
 
-O repositório está hospedado em `kanaflixcursos/kanaflixcrm`. A aplicação fica no diretório `kanaflix-crm/`; o projeto da Vercel deve usar esse diretório como **Root Directory**. Produção deve usar um projeto Supabase separado do desenvolvimento, com variáveis configuradas diretamente na Vercel.
+O repositório está hospedado em `kanaflixcursos/kanaflixcrm`. A aplicação fica no diretório `kanaflix-crm/`; o projeto da Vercel deve usar esse diretório como **Root Directory**. Produção deve usar um projeto Supabase separado do desenvolvimento, com variáveis configuradas diretamente na Vercel. O endpoint público usa `UPSTASH_REDIS_REST_URL` e `UPSTASH_REDIS_REST_TOKEN` quando configurados para aplicar rate limit compartilhado entre instâncias. Sem essas variáveis, previews e desenvolvimento usam um fallback em memória por instância; isso não deve ser considerado proteção suficiente para um beta público.
 
 Não versionar `.env*`, `.vercel`, tokens, chaves privadas ou dados de clientes.
 

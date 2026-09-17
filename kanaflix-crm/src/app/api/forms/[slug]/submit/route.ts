@@ -135,7 +135,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/form
 export async function POST(request: Request, { params }: RouteContext<"/api/forms/[slug]/submit">) {
   const { slug } = await params;
   const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "unknown";
-  const rate = consumePublicRequest(`form:${slug}:${clientIp}`);
+  const rate = await consumePublicRequest(`form:${slug}:${clientIp}`);
   if (!rate.allowed) {
     return new Response(JSON.stringify({ error: "Muitas tentativas. Aguarde alguns segundos e tente novamente." }), {
       status: 429,
