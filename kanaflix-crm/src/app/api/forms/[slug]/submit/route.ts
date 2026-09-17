@@ -88,6 +88,21 @@ function normalizedOrigin(value: string | null) {
   try { return new URL(value).origin; } catch { return null; }
 }
 
+async function verifyTurnstile(token: string, remoteIp: string | null) {
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+  if (!secret) return false;
+  const body = new URLSearchParams({ secret, response: token });
+  if (remoteIp) body.set("remoteip", remoteIp);
+  try {
+    const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body, cache: "no-store" });
+    if (!response.ok) return false;
+    const result = (await response.json()) as { success?: boolean };
+    return result.success === true;
+  } catch {
+    return false;
+  }
+}
+
 async function readPayload(request: Request): Promise<Record<string, unknown>> {
   const contentType = (request.headers.get("content-type") ?? "").toLowerCase();
 
@@ -174,6 +189,14 @@ export async function POST(request: Request, { params }: RouteContext<"/api/form
   const allowedOrigins = Array.isArray(form.allowed_origins) ? form.allowed_origins : [];
   if (requestOrigin && allowedOrigins.length > 0 && !allowedOrigins.includes(requestOrigin)) {
     return errorResponse(request, "Esta origem não está autorizada para enviar este formulário.", 403);
+  }
+  const turnstileToken = typeof payload._turnstile_token === "string" ? payload._turnstile_token : "";
+  delete payload._turnstile_token;
+  if (form.turnstile_enabled) {
+    if (!process.env.TURNSTILE_SECRET_KEY) return errorResponse(request, "A proteção anti-abuso ainda não foi configurada neste ambiente.", 503);
+    if (!turnstileToken || !(await verifyTurnstile(turnstileToken, clientIp === "unknown" ? null : clientIp))) {
+      return errorResponse(request, "Confirme a proteção anti-abuso e tente novamente.", 403);
+    }
   }
   payload = normalizeFormPayload(payload, Array.isArray(form.fields) ? form.fields as LeadFormField[] : []);
 

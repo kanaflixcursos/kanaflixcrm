@@ -18,6 +18,7 @@ type FormValue = {
   campaign_name: string | null;
   default_tags: string[];
   allowed_origins: string[];
+  turnstile_enabled: boolean;
 };
 
 const initialState: LeadFormActionState = {};
@@ -132,6 +133,10 @@ export function FormBuilder({ form }: Readonly<{ form?: FormValue }>) {
           <span className="text-sm font-medium">Origens autorizadas <span className="font-normal text-muted-foreground">(opcional)</span></span>
           <textarea name="allowedOrigins" rows={4} defaultValue={form?.allowed_origins.join("\n") ?? ""} placeholder={'https://www.seusite.com.br\nhttps://landing.seusite.com.br'} className="w-full resize-y rounded-2xl border border-border bg-surface px-4 py-3 text-sm" />
           <span className="block text-xs leading-5 text-muted-foreground">Uma origem por linha, sem caminho ou barra final. Até 20 origens.</span>
+        </label>
+        <label className="mt-5 flex items-start gap-3 rounded-2xl border border-border p-4 text-sm">
+          <input type="checkbox" name="turnstileEnabled" value="on" defaultChecked={form?.turnstile_enabled ?? false} className="mt-1 size-4 accent-[var(--brand)]" />
+          <span><span className="font-medium">Ativar proteção anti-abuso</span><span className="mt-1 block text-xs leading-5 text-muted-foreground">Usa Cloudflare Turnstile no formulário público. Requer `NEXT_PUBLIC_TURNSTILE_SITE_KEY` e `TURNSTILE_SECRET_KEY` configuradas no ambiente.</span></span>
         </label>
       </section>
 

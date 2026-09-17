@@ -30,7 +30,7 @@ export default async function PublicFormPage({ params, searchParams }: Readonly<
           <div className="h-1.5 w-16 rounded-full bg-brand" />
           <h1 className="mt-7 text-3xl font-medium tracking-[-0.04em] sm:text-4xl">{form.title}</h1>
           {form.description && <p className="mt-4 text-base leading-7 text-muted-foreground">{form.description}</p>}
-          <PublicLeadForm slug={form.slug} fields={form.fields as LeadFormField[]} successMessage={form.success_message} redirectUrl={form.redirect_url} initialSubmitted={query.submitted === "1"} />
+          <PublicLeadForm slug={form.slug} fields={form.fields as LeadFormField[]} successMessage={form.success_message} redirectUrl={form.redirect_url} turnstileEnabled={form.turnstile_enabled} initialSubmitted={query.submitted === "1"} />
         </section>
         {!isEmbed && <p className="mt-5 text-center text-xs text-muted-foreground">Formulário seguro por Kanaflix CRM</p>}
       </div>

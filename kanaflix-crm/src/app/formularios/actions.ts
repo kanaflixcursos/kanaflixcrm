@@ -28,6 +28,7 @@ const formSchema = z.object({
   campaignName: z.string().trim().max(300),
   defaultTags: z.string(),
   allowedOrigins: z.string().trim().max(5000),
+  turnstileEnabled: z.enum(["on", "off"]).default("off"),
 });
 
 function parseAllowedOrigins(value: string): { data: string[] } | { error: string } {
@@ -74,6 +75,7 @@ function readFormData(formData: FormData) {
     campaignName: formData.get("campaignName"),
     defaultTags: String(formData.get("defaultTags") ?? ""),
     allowedOrigins: String(formData.get("allowedOrigins") ?? ""),
+    turnstileEnabled: formData.get("turnstileEnabled") === "on" ? "on" : "off",
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message } as const;
 
@@ -81,7 +83,7 @@ function readFormData(formData: FormData) {
   if (!fields.success) return { error: fields.error } as const;
   const origins = parseAllowedOrigins(parsed.data.allowedOrigins);
   if (!("data" in origins)) return { error: origins.error } as const;
-  return { data: { ...parsed.data, fields: fields.data, allowedOrigins: origins.data } } as const;
+  return { data: { ...parsed.data, fields: fields.data, allowedOrigins: origins.data, turnstileEnabled: parsed.data.turnstileEnabled === "on" } } as const;
 }
 
 function refreshForms() {
@@ -115,6 +117,7 @@ export async function createLeadForm(
       campaign_name: input.data.campaignName || null,
       default_tags: parseTags(input.data.defaultTags),
       allowed_origins: input.data.allowedOrigins,
+      turnstile_enabled: input.data.turnstileEnabled,
     })
     .select("id")
     .single();
@@ -150,6 +153,7 @@ export async function updateLeadForm(
       campaign_name: input.data.campaignName || null,
       default_tags: parseTags(input.data.defaultTags),
       allowed_origins: input.data.allowedOrigins,
+      turnstile_enabled: input.data.turnstileEnabled,
     })
     .eq("id", formId.data)
     .eq("organization_id", workspace.organizationId);

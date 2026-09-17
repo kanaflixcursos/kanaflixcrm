@@ -4,11 +4,43 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { CheckCircle2, LoaderCircle, Send } from "lucide-react";
 import type { LeadFormField } from "@/lib/lead-forms";
 
-export function PublicLeadForm({ slug, fields, successMessage, redirectUrl, initialSubmitted = false }: Readonly<{ slug: string; fields: LeadFormField[]; successMessage: string; redirectUrl?: string | null; initialSubmitted?: boolean }>) {
+type TurnstileApi = { render: (element: HTMLElement, options: { sitekey: string; callback: (token: string) => void; "expired-callback": () => void; "error-callback": () => void }) => string; reset: (widgetId?: string) => void };
+
+declare global { interface Window { turnstile?: TurnstileApi } }
+
+export function PublicLeadForm({ slug, fields, successMessage, redirectUrl, turnstileEnabled = false, initialSubmitted = false }: Readonly<{ slug: string; fields: LeadFormField[]; successMessage: string; redirectUrl?: string | null; turnstileEnabled?: boolean; initialSubmitted?: boolean }>) {
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(initialSubmitted);
+  const [turnstileToken, setTurnstileToken] = useState("");
   const attributionRef = useRef<Record<string, string>>({});
+  const turnstileContainerRef = useRef<HTMLDivElement>(null);
+  const turnstileWidgetRef = useRef<string | undefined>(undefined);
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
+  useEffect(() => {
+    if (!turnstileEnabled || !turnstileSiteKey) return;
+    const renderWidget = () => {
+      if (!window.turnstile || !turnstileContainerRef.current || turnstileWidgetRef.current) return;
+      turnstileWidgetRef.current = window.turnstile.render(turnstileContainerRef.current, {
+        sitekey: turnstileSiteKey,
+        callback: setTurnstileToken,
+        "expired-callback": () => setTurnstileToken(""),
+        "error-callback": () => setTurnstileToken(""),
+      });
+    };
+    if (window.turnstile) { renderWidget(); return; }
+    const existing = document.querySelector<HTMLScriptElement>('script[data-kanaflix-turnstile]');
+    if (existing) { existing.addEventListener("load", renderWidget); return () => existing.removeEventListener("load", renderWidget); }
+    const script = document.createElement("script");
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    script.async = true;
+    script.defer = true;
+    script.dataset.kanaflixTurnstile = "true";
+    script.addEventListener("load", renderWidget);
+    document.head.appendChild(script);
+    return () => script.removeEventListener("load", renderWidget);
+  }, [turnstileEnabled, turnstileSiteKey]);
 
   useEffect(() => {
     const storageKey = "kanaflix_attribution_v1";
@@ -33,7 +65,13 @@ export function PublicLeadForm({ slug, fields, successMessage, redirectUrl, init
     setError(null);
     setIsPending(true);
     const form = event.currentTarget;
+    if (turnstileEnabled && !turnstileToken) {
+      setError(turnstileSiteKey ? "Confirme a proteção anti-abuso antes de enviar." : "A proteção deste formulário ainda não foi configurada pelo administrador.");
+      setIsPending(false);
+      return;
+    }
     const payload = Object.fromEntries(new FormData(form).entries());
+    if (turnstileToken) payload._turnstile_token = turnstileToken;
     for (const [key, value] of Object.entries(attributionRef.current)) payload[`_${key}`] = value;
 
     try {
@@ -50,6 +88,8 @@ export function PublicLeadForm({ slug, fields, successMessage, redirectUrl, init
       }
       setSubmitted(true);
       form.reset();
+      setTurnstileToken("");
+      if (turnstileWidgetRef.current) window.turnstile?.reset(turnstileWidgetRef.current);
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : "Não foi possível enviar seus dados.");
     } finally {
@@ -88,6 +128,7 @@ export function PublicLeadForm({ slug, fields, successMessage, redirectUrl, init
       </div>
 
       {error && <p className="mt-5 rounded-2xl bg-brand-soft px-4 py-3 text-sm" role="alert">{error}</p>}
+      {turnstileEnabled && <div className="mt-5"><div ref={turnstileContainerRef} />{!turnstileSiteKey && <p className="mt-2 text-xs text-muted-foreground">Proteção anti-abuso pendente de configuração.</p>}</div>}
       <div className="mt-8 flex justify-end border-t border-border pt-6">
         <button disabled={isPending} className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-brand px-5 text-sm font-medium text-brand-foreground transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto">
           {isPending ? <LoaderCircle className="animate-spin" size={18} /> : <Send size={17} />}

@@ -10,7 +10,7 @@
 
 Última execução: 17 de setembro de 2026.
 
-- **Concluído localmente:** aplicação completa versionada no GitHub; CI de lint/build criado; Next.js atualizado para `16.3.5`; auditoria de produção sem vulnerabilidades; headers de segurança básicos; estados globais de carregamento/erro/404; navegação mobile; recuperação e redefinição de senha; callback OAuth com erro recuperável; build e lint aprovados; 38 verificações de isolamento multitenant aprovadas; suíte de captura pública aprovada; uploads de imagem separados por workspace; proteção de rajadas no endpoint público; allowlist opcional de origens por formulário; exportação CSV dos leads filtrados por workspace.
+- **Concluído localmente:** aplicação completa versionada no GitHub; CI de lint/build criado; Next.js atualizado para `16.3.5`; auditoria de produção sem vulnerabilidades; headers de segurança básicos; estados globais de carregamento/erro/404; navegação mobile; recuperação e redefinição de senha; callback OAuth com erro recuperável; build e lint aprovados; 38 verificações de isolamento multitenant aprovadas; suíte de captura pública aprovada; uploads de imagem separados por workspace; proteção de rajadas no endpoint público; allowlist opcional de origens por formulário; Turnstile opcional por formulário; exportação CSV dos leads filtrados por workspace.
 - **Operabilidade adicionada:** endpoint público `GET /api/health` para smoke tests e monitores, sem exposição de segredos.
 - **Commits publicados:** `2dd5785`, `d19b614`, `375b4a4`, `301f755` e `0403f17` na branch `main`.
 - **Preview local:** `http://localhost:8081` ativo.
@@ -360,7 +360,7 @@ Tornar formulários, iframe e endpoints públicos resistentes a abuso e fáceis 
 ### Tarefas
 
 - [ ] Configurar e validar em produção o rate limit distribuído por IP e slug (Redis/Upstash) e avaliar Turnstile antes do beta público.
-- [ ] Adicionar Turnstile opcional por formulário.
+- [x] Adicionar Turnstile opcional por formulário; falta apenas configurar as chaves no ambiente de produção.
 - [x] Permitir domínios/origens autorizados por formulário sem quebrar uso server-to-server.
 - [ ] Criar segredo opcional para endpoint privado.
 - [ ] Implementar idempotência por header e por identificador de webhook.
