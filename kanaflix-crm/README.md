@@ -39,6 +39,8 @@ npm run verify:lead-capture
 
 Os dois scripts de verificação sintética exigem `SUPABASE_ACCESS_TOKEN` e usam dados temporários que são removidos ao final. Nunca execute esses scripts apontando para um banco sem antes confirmar o projeto e o ambiente.
 
+O endpoint `GET /api/health` pode ser usado por monitores e smoke tests. Ele retorna o estado da configuração básica, o commit da Vercel quando disponível e o backend do rate limit, sem retornar chaves ou dados de negócio.
+
 ## Ambientes e deploy
 
 O repositório está hospedado em `kanaflixcursos/kanaflixcrm`. A aplicação fica no diretório `kanaflix-crm/`; o projeto da Vercel deve usar esse diretório como **Root Directory**. Produção deve usar um projeto Supabase separado do desenvolvimento, com variáveis configuradas diretamente na Vercel. O endpoint público usa `UPSTASH_REDIS_REST_URL` e `UPSTASH_REDIS_REST_TOKEN` quando configurados para aplicar rate limit compartilhado entre instâncias. Sem essas variáveis, previews e desenvolvimento usam um fallback em memória por instância; isso não deve ser considerado proteção suficiente para um beta público.
