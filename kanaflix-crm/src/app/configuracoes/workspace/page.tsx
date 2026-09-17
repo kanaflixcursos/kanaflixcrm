@@ -8,7 +8,7 @@ import { MembersManager } from "./members-manager";
 export const dynamic = "force-dynamic";
 export default async function WorkspaceSettingsPage() {
  const { supabase, organization, userId } = await getCurrentWorkspace();
- const [{ data: workspace }, { data: memberRows }] = await Promise.all([supabase.from("organizations").select("name, logo_url").eq("id", organization.id).single(), supabase.from("organization_members").select("user_id, role").eq("organization_id", organization.id)]);
+ const [{ data: workspace }, { data: memberRows }] = await Promise.all([supabase.from("organizations").select("id, name, logo_url").eq("id", organization.id).single(), supabase.from("organization_members").select("user_id, role").eq("organization_id", organization.id)]);
  const ids = memberRows?.map((member) => member.user_id) ?? [];
  const { data: profiles } = ids.length ? await supabase.from("profiles").select("id, full_name").in("id", ids) : { data: [] };
  const profileNames = new Map((profiles ?? []).map((profile) => [profile.id, profile.full_name ?? "Usuário"]));

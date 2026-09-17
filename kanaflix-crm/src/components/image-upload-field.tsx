@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
-export function ImageUploadField({ name, label, defaultValue = "" }: Readonly<{ name: string; label: string; defaultValue?: string | null }>) {
+export function ImageUploadField({ name, label, defaultValue = "", scope = "user", scopeId }: Readonly<{ name: string; label: string; defaultValue?: string | null; scope?: "user" | "workspace"; scopeId?: string }>) {
   const inputId = useId();
   const [url, setUrl] = useState(defaultValue ?? "");
   const [error, setError] = useState("");
@@ -23,7 +23,10 @@ export function ImageUploadField({ name, label, defaultValue = "" }: Readonly<{ 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setError("Sua sessão expirou. Entre novamente."); setIsUploading(false); return; }
     const extension = file.name.split(".").pop()?.toLowerCase() || "png";
-    const path = `${user.id}/uploads/${crypto.randomUUID()}.${extension}`;
+    if (scope === "workspace" && !scopeId) { setError("Não foi possível identificar o workspace."); setIsUploading(false); return; }
+    const path = scope === "workspace"
+      ? `workspace/${scopeId}/uploads/${crypto.randomUUID()}.${extension}`
+      : `${user.id}/uploads/${crypto.randomUUID()}.${extension}`;
     const { error: uploadError } = await supabase.storage.from("crm-images").upload(path, file, { contentType: file.type, upsert: false });
     if (uploadError) { setError("Não foi possível enviar a imagem."); setIsUploading(false); return; }
     const { data } = supabase.storage.from("crm-images").getPublicUrl(path);

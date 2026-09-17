@@ -60,6 +60,7 @@ select set_config('request.jwt.claim.sub', 'ea77c426-8d0e-4aa0-a1c5-0000000000a1
 insert into public.contacts (id, owner_id, organization_id, full_name)
 values ('ea77c426-8d0e-4aa0-a1c5-000000000105', 'ea77c426-8d0e-4aa0-a1c5-0000000000a1', 'ea77c426-8d0e-4aa0-a1c5-0000000000c3', 'QA Contact A2');
 insert into qa_results select 'same user sees only active workspace', not exists (select 1 from public.contacts where id = 'ea77c426-8d0e-4aa0-a1c5-000000000102') and exists (select 1 from public.contacts where id = 'ea77c426-8d0e-4aa0-a1c5-000000000105');
+insert into qa_results select 'workspace image scope resolves only active organization', public.is_current_organization_text('ea77c426-8d0e-4aa0-a1c5-0000000000c3') and not public.is_current_organization_text('ea77c426-8d0e-4aa0-a1c5-0000000000a1');
 insert into qa_results select 'same user cannot see forms or submissions from inactive workspace',
   not exists (select 1 from public.lead_forms where id = 'ea77c426-8d0e-4aa0-a1c5-000000000107')
   and not exists (select 1 from public.form_submissions where form_id = 'ea77c426-8d0e-4aa0-a1c5-000000000107');
@@ -73,6 +74,7 @@ update public.profiles set current_organization_id = 'ea77c426-8d0e-4aa0-a1c5-00
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'ea77c426-8d0e-4aa0-a1c5-0000000000a1', true);
 insert into qa_results select 'switching workspace does not mix data', exists (select 1 from public.contacts where id = 'ea77c426-8d0e-4aa0-a1c5-000000000102') and not exists (select 1 from public.contacts where id = 'ea77c426-8d0e-4aa0-a1c5-000000000105');
+insert into qa_results select 'workspace image scope returns to original organization', public.is_current_organization_text('ea77c426-8d0e-4aa0-a1c5-0000000000a1') and not public.is_current_organization_text('ea77c426-8d0e-4aa0-a1c5-0000000000c3');
 
 reset role;
 set local role authenticated;
