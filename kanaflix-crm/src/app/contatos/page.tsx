@@ -19,7 +19,7 @@ export default async function ContactsPage({ searchParams }: Readonly<{ searchPa
 
   const { data } = await supabase
     .from("contacts")
-    .select("id, full_name, email, phone, source, status, tags, utm_campaign, last_conversion_at, created_at")
+    .select("id, full_name, email, phone, source, status, tags, utm_source, utm_medium, utm_campaign, utm_content, utm_term, landing_page_url, referrer_url, last_conversion_at, created_at")
     .order("last_conversion_at", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false });
 
