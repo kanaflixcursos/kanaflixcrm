@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ContactRound, Plus, Search } from "lucide-react";
+import { ContactRound, Plus, Search, Upload } from "lucide-react";
 import { getCurrentWorkspace } from "@/lib/current-workspace";
 import { AppShell } from "@/components/app-shell";
 import { PageEyebrow } from "@/components/page-eyebrow";
@@ -48,7 +48,7 @@ export default async function ContactsPage({ searchParams }: Readonly<{ searchPa
               Acompanhe quem chegou, de qual campanha veio e o que aconteceu depois da conversão.
             </p>
           </div>
-          <Link href="/contatos/novo" className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-2xl bg-brand px-5 text-sm font-medium text-brand-foreground shadow-sm transition-colors hover:bg-brand-hover"><Plus size={18} />Novo lead</Link>
+          <div className="flex flex-wrap gap-2"><Link href="/contatos/importar" className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-2xl border border-border bg-surface px-5 text-sm font-medium transition-colors hover:bg-surface-muted"><Upload size={18} />Importar CSV</Link><Link href="/contatos/novo" className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-2xl bg-brand px-5 text-sm font-medium text-brand-foreground shadow-sm transition-colors hover:bg-brand-hover"><Plus size={18} />Novo lead</Link></div>
         </header>
 
         <section aria-label="Resumo de leads" className="mt-8 grid gap-4 sm:grid-cols-3">

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { leadStatuses, parseTags } from "@/lib/lead-status";
+import { normalizeCsvHeader, parseCsv } from "@/lib/csv";
 
 const leadStatusValues = leadStatuses.map((status) => status.value) as ["new", ...("reviewing" | "qualified" | "follow_up" | "converted" | "discarded")[]];
 
@@ -43,6 +44,7 @@ function readLead(formData: FormData) {
 export type CreateContactState = { error?: string };
 export type UpdateContactState = { error?: string };
 export type BulkLeadState = { error?: string; success?: string };
+export type ImportLeadState = { error?: string; success?: string; details?: string[] };
 
 export async function quickUpdateLeadStatus(formData: FormData) {
   const id = z.string().uuid().safeParse(formData.get("contactId"));
@@ -223,4 +225,71 @@ export async function deleteContact(formData: FormData) {
   revalidatePath("/atividades");
   revalidatePath("/oportunidades");
   redirect("/contatos");
+}
+
+export async function importContacts(_previous: ImportLeadState, formData: FormData): Promise<ImportLeadState> {
+  const file = formData.get("file");
+  if (!(file instanceof File) || !file.size) return { error: "Selecione um arquivo CSV." };
+  if (file.size > 5 * 1024 * 1024) return { error: "O arquivo deve ter no máximo 5 MB." };
+  const parsedCsv = parseCsv(await file.text());
+  if (!parsedCsv.headers.length) return { error: "O CSV está vazio." };
+  if (parsedCsv.rows.length > 10000) return { error: "Importe no máximo 10.000 linhas por vez." };
+
+  const columns = new Map(parsedCsv.headers.map((header, index) => [normalizeCsvHeader(header), index]));
+  const get = (row: string[], names: string[]) => {
+    const index = names.map(normalizeCsvHeader).map((name) => columns.get(name)).find((value) => value !== undefined);
+    return index === undefined ? "" : row[index] ?? "";
+  };
+  if (!["nome", "name", "fullname", "full_name"].some((name) => columns.has(normalizeCsvHeader(name)))) return { error: "O CSV precisa ter uma coluna Nome ou Name." };
+
+  const supabase = await createClient();
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const userId = claimsData?.claims?.sub;
+  if (!userId) return { error: "Sua sessão expirou." };
+  const { data: profile } = await supabase.from("profiles").select("current_organization_id").eq("id", userId).maybeSingle();
+  const organizationId = profile?.current_organization_id;
+  if (!organizationId) return { error: "Não foi possível identificar o workspace." };
+
+  const { data: existing } = await supabase.from("contacts").select("email, phone").eq("organization_id", organizationId);
+  const existingEmails = new Set((existing ?? []).map((item) => item.email?.trim().toLowerCase()).filter(Boolean));
+  const existingPhones = new Set((existing ?? []).map((item) => (item.phone ?? "").replace(/\D/g, "")).filter((value) => value.length >= 8));
+  const seenEmails = new Set<string>();
+  const seenPhones = new Set<string>();
+  const rowsToInsert: Record<string, unknown>[] = [];
+  const details: string[] = [];
+
+  parsedCsv.rows.forEach((row, index) => {
+    const line = index + 2;
+    const fullName = get(row, ["nome", "name", "full_name", "fullname"]).trim();
+    const email = get(row, ["email", "e-mail"]).trim().toLowerCase();
+    const phone = get(row, ["telefone", "phone", "tel", "celular"]).trim();
+    const phoneDigits = phone.replace(/\D/g, "");
+    if (fullName.length < 2) { details.push(`Linha ${line}: nome ausente ou inválido.`); return; }
+    if (!email && phoneDigits.length < 8) { details.push(`Linha ${line}: informe e-mail ou telefone.`); return; }
+    if ((email && (existingEmails.has(email) || seenEmails.has(email))) || (phoneDigits && (existingPhones.has(phoneDigits) || seenPhones.has(phoneDigits)))) { details.push(`Linha ${line}: contato duplicado ignorado.`); return; }
+    if (email) seenEmails.add(email);
+    if (phoneDigits) seenPhones.add(phoneDigits);
+    const parsedStatus = leadStatuses.find((status) => status.value === get(row, ["status"]));
+    rowsToInsert.push({
+      owner_id: userId,
+      organization_id: organizationId,
+      full_name: fullName,
+      email: email || null,
+      phone: phone || null,
+      source: get(row, ["origem", "source"]) || "Importação CSV",
+      notes: get(row, ["observacoes", "observações", "notes"]) || null,
+      status: parsedStatus?.value ?? "new",
+      tags: parseTags(get(row, ["tags", "etiquetas"])),
+      utm_source: get(row, ["utm_source", "utm source"]) || null,
+      utm_medium: get(row, ["utm_medium", "utm medium"]) || null,
+      utm_campaign: get(row, ["utm_campaign", "utm campaign"]) || null,
+    });
+  });
+
+  for (let index = 0; index < rowsToInsert.length; index += 500) {
+    const { error } = await supabase.from("contacts").insert(rowsToInsert.slice(index, index + 500));
+    if (error) return { error: "A importação falhou ao gravar os contatos. Verifique o arquivo e tente novamente." };
+  }
+  revalidatePath("/contatos");
+  return { success: `${rowsToInsert.length} contato(s) importado(s). ${details.length} linha(s) ignorada(s).`, details: details.slice(0, 20) };
 }
