@@ -443,9 +443,8 @@ Remover controles falsos, completar os fluxos principais e garantir uso confort�
 ### Tarefas
 
 - [ ] Criar navegação mobile com drawer e seletor de workspace.
-- [ ] Implementar busca global real ou remover o campo do navbar.
-- [ ] Remover o sino até existirem notificações reais.
-- [ ] Criar suporte mínimo ou remover o item desabilitado.
+- [x] Remover busca global e sino enquanto essas capacidades ainda não possuem comportamento real.
+- [x] Remover o item de suporte desabilitado até existir um canal real.
 - [ ] Criar `loading.tsx`, `error.tsx` e estados vazios coerentes.
 - [ ] Tratar erros retornados por todas as consultas do Supabase.
 - [ ] Criar páginas de not found apropriadas para entidades.

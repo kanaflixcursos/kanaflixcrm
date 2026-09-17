@@ -6,17 +6,14 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-  Bell,
   CalendarDays,
   ChartNoAxesColumnIncreasing,
   Building2,
-  CircleHelp,
   ContactRound,
   FileText,
   LayoutDashboard,
   ListTodo,
   Menu,
-  Search,
   Settings,
   Target,
   X,
@@ -89,10 +86,6 @@ export function AppShell({
             <Settings size={19} strokeWidth={1.9} aria-hidden="true" />
             Configurações
           </Link>
-          <span className="flex h-11 cursor-not-allowed items-center gap-3 rounded-2xl px-3.5 text-sm text-muted-foreground opacity-45" title="Em breve">
-            <CircleHelp size={19} strokeWidth={1.9} aria-hidden="true" />
-            Ajuda e suporte
-          </span>
         </div>
       </aside>
 
@@ -106,25 +99,8 @@ export function AppShell({
               <Image src="/logo-kanaflix-crm.png" alt="Kanaflix CRM" width={150} height={24} priority />
             </Link>
           </div>
-          <label className="relative hidden min-w-0 flex-1 lg:block">
-            <Search
-              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
-              size={18}
-              aria-hidden="true"
-            />
-            <input
-              type="search"
-              placeholder="Buscar no CRM"
-              className="h-11 w-full max-w-sm rounded-2xl border border-border bg-surface-muted pl-10 pr-4 text-sm placeholder:text-muted-foreground"
-            />
-          </label>
+          <div className="hidden min-w-0 flex-1 lg:block" aria-hidden="true" />
           <div className="flex items-center gap-2 sm:gap-3">
-            <button
-              className="grid size-11 place-items-center rounded-2xl text-muted-foreground transition-colors hover:bg-surface-muted hover:text-foreground"
-              aria-label="Ver notificações"
-            >
-              <Bell size={20} strokeWidth={1.9} aria-hidden="true" />
-            </button>
             <SignOutButton />
           </div>
         </header>
